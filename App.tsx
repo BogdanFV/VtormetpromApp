@@ -1,6 +1,5 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
-  Button,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -13,14 +12,28 @@ import {
   View,
 } from 'react-native';
 
-import {Colors} from 'react-native/Libraries/NewAppScreen';
-
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   const {styles} = useStyle();
 
   const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    backgroundColor: isDarkMode ? '#000' : '#fff',
+  };
+  const [login, setLogin] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLoginChange = (value: string) => {
+    setLogin(value);
+  };
+
+  const handlePasswordChange = (value: string) => {
+    setPassword(value);
+  };
+
+  const handleSubmit = () => {
+    console.log(`Login: ${login}, Password: ${password}`);
+    setLogin('');
+    setPassword('');
   };
 
   return (
@@ -31,21 +44,26 @@ function App(): JSX.Element {
       />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <View style={styles.startPageContainer}>
-          <View style={styles.loginFieldContainer}>
-            <Text style={styles.title}>Введите данные</Text>
-            <SafeAreaView>
-              <TextInput style={styles.input} placeholder="login" />
-              <TextInput
-                style={styles.input}
-                placeholder="password"
-                keyboardType="numeric"
-              />
-              <Pressable style={styles.button}>
-                <Text style={styles.buttonText}>Отправить</Text>
-              </Pressable>
-            </SafeAreaView>
+        contentContainerStyle={styles.container}>
+        <View style={styles.loginFieldContainer}>
+          <Text style={styles.title}>Введите данные</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Логин"
+              value={login}
+              onChangeText={handleLoginChange}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Пароль"
+              secureTextEntry
+              value={password}
+              onChangeText={handlePasswordChange}
+            />
+            <Pressable style={styles.button} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>Отправить</Text>
+            </Pressable>
           </View>
         </View>
       </ScrollView>
@@ -55,11 +73,10 @@ function App(): JSX.Element {
 
 const useStyle = () => {
   const dimensions = useWindowDimensions();
-  console.log('Logging dimensions', dimensions);
 
   const styles = StyleSheet.create({
-    startPageContainer: {
-      flex: 1,
+    container: {
+      flexGrow: 1,
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: '#171717',
@@ -72,19 +89,21 @@ const useStyle = () => {
       margin: 24,
       paddingVertical: 8,
       borderWidth: 4,
-      borderColor: '#20232a',
+      borderColor: '#ccc',
       borderRadius: 6,
-      backgroundColor: '#888888',
-      color: '#20232a',
-      textAlign: 'center',
-      fontSize: 30,
-      fontWeight: 'bold',
+      backgroundColor: '#f5f5f5',
       height: dimensions.height / 2,
       width: dimensions.width / 1.2,
     },
     title: {
       fontSize: 30,
-      color: '#20232a',
+      color: '#333',
+      fontWeight: 'bold',
+      marginBottom: 20,
+    },
+    inputContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     input: {
       height: 50,
@@ -93,20 +112,24 @@ const useStyle = () => {
       marginTop: 12,
       marginBottom: 12,
       borderWidth: 1,
+      borderRadius: 6,
       padding: 10,
+      backgroundColor: '#fff',
     },
     button: {
       alignItems: 'center',
       justifyContent: 'center',
       width: dimensions.width / 1.7,
-      backgroundColor: '#131313',
+      backgroundColor: '#333',
       marginTop: 12,
       marginBottom: 12,
       height: 50,
-      cursor: 'pointer',
+      borderRadius: 6,
     },
     buttonText: {
-      color: '#FFFFFF',
+      color: '#fff',
+      fontWeight: 'bold',
+      fontSize: 18,
     },
   });
 
