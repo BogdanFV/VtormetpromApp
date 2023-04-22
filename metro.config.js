@@ -1,10 +1,3 @@
-/**
- * Metro configuration for React Native
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 module.exports = {
   transformer: {
     getTransformOptions: async () => ({
@@ -13,5 +6,9 @@ module.exports = {
         inlineRequires: true,
       },
     }),
+  },
+  //added this
+  resolver: {
+    sourceExts: ['jsx', 'js', 'ts', 'tsx', 'cjs'],
   },
 };
