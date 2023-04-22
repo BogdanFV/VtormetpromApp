@@ -1,22 +1,19 @@
-import React from "react";
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import React, { useState } from "react";
 import VtormetpromLogo from '../../assets/vtormeprom_logo';
 import {
-  Image,
   Pressable,
   StyleSheet,
   TextInput,
   Text,
   View,
   useWindowDimensions,
-  TouchableWithoutFeedback, 
+  TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-//import Icon from 'react-native-vector-icons/FontAwesome';
 import { StackScreenProps } from "@react-navigation/stack";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { LinearGradient } from "expo-linear-gradient";
-
+import ErrorPopup from "../components/ErrorPopup";
 const logo = require("../../assets/logo.png")
 
 const auth = getAuth();
@@ -28,12 +25,14 @@ function SignInScreen<StackScreenProps>({ navigation }: any) {
     error: "",
   });
 
-  async function signIn() {
+  const [errorVisible, setErrorVisible] = useState(false);
+
+  async function signUp() {
     if (value.email === "" || value.password === "") {
       setValue({
         ...value,
-        error: "Email and password are mandatory.",
       });
+      setErrorVisible(true);
       return;
     }
 
@@ -46,6 +45,7 @@ function SignInScreen<StackScreenProps>({ navigation }: any) {
       });
     }
   }
+
   const dimensions = useWindowDimensions();
 
   const styles = StyleSheet.create({
@@ -92,40 +92,42 @@ function SignInScreen<StackScreenProps>({ navigation }: any) {
     }
   });
 
-  return (<View className="w-full h-full">
-    <LinearGradient colors={['#535353', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#535353']} style={styles.container}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View className="mx-4 h-5/6 flex justify-center align-center space-y-6" style={styles.inputCover}>
-          <VtormetpromLogo />
-          <View className="space-y-6">
-            <TextInput
-              placeholder="Email"
-              value={value.email}
-              style={styles.input}
-              onChangeText={(text) => setValue({ ...value, email: text })}
-            />
-            <TextInput
-              placeholder="Password"
-              style={styles.input}
-              onChangeText={(text) => setValue({ ...value, password: text })}
-              secureTextEntry={true}
-            />
-            <Pressable className="bg-background border border-white rounded-3xl py-2 px-4 m-4" style={styles.buttonCover}>
-              <Text onPress={signIn} style={styles.buttonText}>
-                Войти
+  return (
+    <View className="w-full h-full">
+      <LinearGradient colors={['#535353', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#535353']} style={styles.container}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View className="mx-4 h-5/6 flex justify-center align-center space-y-6" style={styles.inputCover}>
+            <VtormetpromLogo />
+            <View className="space-y-6">
+              <TextInput
+                placeholder="Телефон или адрес эл. почты"
+                value={value.email}
+                style={styles.input}
+                onChangeText={(text) => setValue({ ...value, email: text })}
+              />
+              <TextInput
+                placeholder="Введите пароль"
+                style={styles.input}
+                onChangeText={(text) => setValue({ ...value, password: text })}
+                secureTextEntry={true}
+              />
+              <Pressable className="bg-background border border-white rounded-3xl py-2 px-4 m-4" style={styles.buttonCover}>
+                <Text onPress={signUp} style={styles.buttonText}>
+                  Войти
+                </Text>
+              </Pressable>
+              <ErrorPopup visible={errorVisible} onClose={() => setErrorVisible(false)} message={"Необходимо ввести данные"} />
+            </View>
+            <Text >
+              Нет аккаунта?{" "}
+              <Text style={styles.href} onPress={() => navigation.navigate("Sign Up")}>
+                Зарегестрируйтесь
               </Text>
-            </Pressable>
-          </View>
-          <Text >
-            Нет аккаунта?{" "}
-            <Text style={styles.href} onPress={() => navigation.navigate("Sign Up")}>
-              Зарегистрироваться
             </Text>
-          </Text>
-        </View>
-      </TouchableWithoutFeedback>
-    </LinearGradient>
-  </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </LinearGradient>
+    </View>
   );
 }
 
