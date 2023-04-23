@@ -36,6 +36,12 @@ function WelcomeScreen<StackScreenProps>({ navigation }: any) {
       height: 96,
       alignItems: 'center',
       justifyContent: 'center',
+      flexDirection: 'row',
+    },
+    logoName: {
+      marginLeft: 10,
+      fontSize: 28,
+      fontFamily: 'Georgia',
     }
   });
 
@@ -45,6 +51,7 @@ function WelcomeScreen<StackScreenProps>({ navigation }: any) {
       <LinearGradient colors={['#535353', '#BBBBBB', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#BBBBBB', '#535353']} style={styles.container}>
         <View style={styles.logoCover}>
           <VtormetpromLogo />
+          <Text style={styles.logoName}>ИНТЕРЛОГИСТИКА</Text>
         </View>
         <View className="flex justify-center align-center">
           <View style={styles.buttonCover}>

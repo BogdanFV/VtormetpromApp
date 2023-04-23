@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, Button, StyleSheet, TextInput, FlatList, TouchableOpacity } from 'react-native'
+import { View, Text, Button, StyleSheet, TextInput, FlatList, TouchableOpacity, Modal } from 'react-native'
 import { FIRESTORE_DB } from '../config/firebase';
 import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Entypo } from '@expo/vector-icons';
+import AddTodoPopup from '../components/AddTodoPopup';
 
 export interface Todo {
-  titler: string;
-  done: boolean;
   id: string;
 }
 
 export default function HomeScreen() {
 
   const [todos, setTodos] = useState<any[]>([]);
-  const [todo, setTodo] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+
   useEffect(() => {
     const todoRef = collection(FIRESTORE_DB, 'todos');
     const subscriber = onSnapshot(todoRef, {
@@ -31,13 +31,11 @@ export default function HomeScreen() {
         setTodos(todos);
       }
     });
-
     return () => subscriber();
   }, []);
 
   const addTodo = async () => {
-    const doc = await addDoc(collection(FIRESTORE_DB, 'todos'), { title: todo, done: false });
-    setTodo('');
+    setModalVisible(true);
   };
 
   const renderTodo = ({ item }: any) => {
@@ -51,13 +49,17 @@ export default function HomeScreen() {
       deleteDoc(ref);
     }
 
+    const testFunc = async () => {
+      console.log('test: ', item.price, item.title);
+    }
+
     return (
       <View style={styles.todoContainer}>
-        <TouchableOpacity onPress={toggleDone} style={styles.todo}>
+        <TouchableOpacity style={styles.todo} onPress={testFunc}>
           {item.done && <Ionicons name="md-checkmark-circle" size={32} color="green" />}
           {!item.done && <Entypo name="circle" size={32} color="black" />}
-
           <Text style={styles.todoText}>{item.title}</Text>
+          <Text style={styles.todoText}>{parseInt(item.price).toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })}</Text>
         </TouchableOpacity>
         <Ionicons name="trash-bin-outline" size={24} color="red" onPress={deleteItem} />
       </View>
@@ -66,10 +68,10 @@ export default function HomeScreen() {
 
   return (
     <View className="w-full h-full">
+      <AddTodoPopup visible={modalVisible} onClose={() => setModalVisible(false)} />
       <View style={styles.container}>
         <View style={styles.form}>
-          <TextInput style={styles.input} placeholder='Add new todo' onChangeText={(text: string) => setTodo(text)} value={todo}></TextInput>
-          <Button onPress={addTodo} title='Добавить' disabled={todo === ''} color="#000000" />
+          <Button onPress={addTodo} title='Добавить +' color="#000000" />
         </View>
         {todos.length > 0 && (
           <View>
