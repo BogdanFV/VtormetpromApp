@@ -7,6 +7,13 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import AddTodoPopup from '../components/AddTodoPopup';
 
 export interface Todo {
+  distance: String;
+  mass: String;
+  destination: String;
+  date: any;
+  price: string;
+  source: String;
+  title: String;
   id: string;
 }
 
@@ -14,6 +21,7 @@ export default function AdminHomeScreen() {
 
   const [todos, setTodos] = useState<any[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
 
   useEffect(() => {
     const todoRef = collection(FIRESTORE_DB, 'todos');
@@ -33,6 +41,7 @@ export default function AdminHomeScreen() {
     return () => subscriber();
   }, []);
 
+
   const addTodo = async () => {
     setModalVisible(true);
   };
@@ -40,21 +49,16 @@ export default function AdminHomeScreen() {
   const renderTodo = ({ item }: any) => {
     const ref = doc(FIRESTORE_DB, `todos/${item.id}`);
 
-    const toggleDone = async () => {
-      updateDoc(ref, { done: !item.done });
-    }
-
     const deleteItem = async () => {
       deleteDoc(ref);
     }
-
-    const testFunc = async () => {
-      console.log('test: ', new Date(item.date.seconds * 1000).toLocaleString('ru-RU', { day: 'numeric', month: 'long' }));
+    const openTodoDetails = () => {
+      setSelectedTodo(item);
     }
 
     return (
       <View style={styles.todoContainer}>
-        <TouchableOpacity style={styles.todo} onPress={testFunc}>
+        <TouchableOpacity style={styles.todo} onPress={openTodoDetails}>
           {/* {item.done && <Ionicons name="md-checkmark-circle" size={32} color="green" />}
           {!item.done && <Entypo name="circle" size={32} color="black" />} */}
           <View style={styles.firstLine}>
@@ -87,9 +91,40 @@ export default function AdminHomeScreen() {
     );
   };
 
+  const TodoDetailsModal = ({ visible, onClose, todo }: any) => {
+    if (!todo) {
+      return null;
+    }
+
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={visible}
+        onRequestClose={onClose}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text>ID: {todo.id}</Text>
+            <Text>Title: {todo.title}</Text>
+            <Text>Price: {parseInt(todo.price).toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })}</Text>
+            <Text>Source: {todo.source}</Text>
+            <Text>Destination: {todo.destination}</Text>
+            <Text>Date: {new Date(todo.date.seconds * 1000).toLocaleString('ru-RU', { day: 'numeric', month: 'long' })}</Text>
+            <Text>Distance: {todo.distance} km</Text>
+            <Text>Mass: {todo.mass} t</Text>
+            <Button title="Close" onPress={onClose} />
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
+
   return (
     <View className="w-full h-full">
       <AddTodoPopup visible={modalVisible} onClose={() => setModalVisible(false)} />
+      <TodoDetailsModal visible={selectedTodo !== null} onClose={() => setSelectedTodo(null)} todo={selectedTodo} />
       <View style={styles.container}>
         <View style={styles.form}>
           <Button onPress={addTodo} title='Добавить +' color="#000000" />
@@ -112,7 +147,7 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     paddingTop: 50,
-    backgroundColor: '#838383',
+    backgroundColor: '#636363',
     height: '100%',
   },
   form: {
@@ -173,4 +208,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     flex: 1,
   },
+
+
+  modalContainer: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: '#636363',
+    justifyContent: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 10,
+  }
 })
