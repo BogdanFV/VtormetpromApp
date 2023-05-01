@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { View, Text, Button, StyleSheet, TextInput, FlatList, TouchableOpacity, Modal } from 'react-native'
 import { FIRESTORE_DB } from '../config/firebase';
-import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { collection, deleteDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Entypo } from '@expo/vector-icons';
+
 import AddTodoPopup from '../components/AddTodoPopup';
 
 export interface Todo {
@@ -49,18 +49,40 @@ export default function AdminHomeScreen() {
     }
 
     const testFunc = async () => {
-      console.log('test: ', item.price, item.title);
+      console.log('test: ', new Date(item.date.seconds * 1000).toLocaleString('ru-RU', { day: 'numeric', month: 'long' }));
     }
 
     return (
       <View style={styles.todoContainer}>
         <TouchableOpacity style={styles.todo} onPress={testFunc}>
-          {item.done && <Ionicons name="md-checkmark-circle" size={32} color="green" />}
-          {!item.done && <Entypo name="circle" size={32} color="black" />}
-          <Text style={styles.todoText}>{item.title}</Text>
-          <Text style={styles.todoText}>{parseInt(item.price).toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })}</Text>
+          {/* {item.done && <Ionicons name="md-checkmark-circle" size={32} color="green" />}
+          {!item.done && <Entypo name="circle" size={32} color="black" />} */}
+          <View style={styles.firstLine}>
+            <Text style={styles.todoId}>ID: {item.id}</Text>
+            <Ionicons name="trash-bin-outline" size={24} color="red" onPress={deleteItem} />
+          </View>
+          <Text style={styles.todoTitle}>{item.title}</Text>
+          <Text style={styles.todoPrice}>{parseInt(item.price).toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })}</Text>
+          <View style={styles.todoCities}>
+            <Text style={styles.todoSource}>{item.source}</Text>
+            <View style={styles.arrowCover} >
+              <Ionicons name="arrow-forward-outline" size={24} color="red" />
+            </View>
+            <Text style={styles.todoDestination}>{item.destination}</Text>
+          </View>
+          <View style={styles.optionsCover}>
+            <Text style={styles.optionsText}>Погрузка</Text>
+            <Text>{new Date(item.date.seconds * 1000).toLocaleString('ru-RU', { day: 'numeric', month: 'long' })}</Text>
+          </View>
+          <View style={styles.optionsCover}>
+            <Text style={styles.optionsText}>Расстояние</Text>
+            <Text>{item.distance} км</Text>
+          </View>
+          <View style={styles.optionsCover}>
+            <Text style={styles.optionsText}>Объем</Text>
+            <Text>{item.mass} т</Text>
+          </View>
         </TouchableOpacity>
-        <Ionicons name="trash-bin-outline" size={24} color="red" onPress={deleteItem} />
       </View>
     );
   };
@@ -98,29 +120,57 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  input: {
-    flex: 1,
-    height: 40,
-    borderWidth: 1,
-    borderRadius: 4,
-    padding: 10,
-    marginRight: 10,
-    backgroundColor: 'white',
-  },
   todoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#fff',
     padding: 10,
     marginVertical: 4,
   },
-  todoText: {
-    flex: 1,
-    paddingHorizontal: 4,
-  },
   todo: {
     flex: 1,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+  },
+  firstLine: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'stretch',
+  },
+  todoId: {
+    flex: 1,
+  },
+  todoTitle: {
+    flex: 1,
+    fontSize: 16,
+  },
+  todoPrice: {
+    fontSize: 25,
+    marginVertical: 10,
+  },
+  todoCities: {
     flexDirection: 'row',
     alignItems: 'center',
-  }
+    marginBottom: 15,
+  },
+  todoSource: {
+    flex: 1,
+    fontSize: 15,
+    fontFamily: 'Verdana',
+  },
+  todoDestination: {
+    fontSize: 15,
+    fontFamily: 'Verdana',
+  },
+  arrowCover: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  optionsCover: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  optionsText: {
+    fontSize: 13,
+    flex: 1,
+  },
 })

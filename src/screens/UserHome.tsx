@@ -35,7 +35,6 @@ export default function UserHomeScreen() {
 
   const renderTodo = ({ item }: any) => {
     const ref = doc(FIRESTORE_DB, `todos/${item.id}`);
-    console.log(item);
 
     const toggleDone = async () => {
       updateDoc(ref, { done: !item.done });
@@ -46,7 +45,7 @@ export default function UserHomeScreen() {
     }
 
     const testFunc = async () => {
-      console.log('test: ', item.price, item.title);
+      console.log('test: ', ref);
     }
 
     return (
@@ -55,6 +54,7 @@ export default function UserHomeScreen() {
           {/* {item.done && <Ionicons name="md-checkmark-circle" size={32} color="green" />}
           {!item.done && <Entypo name="circle" size={32} color="black" />} */}
           <Text style={styles.todoText}>{item.title}</Text>
+          <Text style={styles.todoText}>{item.destination}</Text>
           <Text style={styles.todoText}>{parseInt(item.price).toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })}</Text>
         </TouchableOpacity>
         <Ionicons name="trash-bin-outline" size={24} color="red" onPress={deleteItem} />

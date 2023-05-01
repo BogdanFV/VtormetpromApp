@@ -4,6 +4,7 @@ import { View, Modal, Text, TouchableOpacity, StyleSheet, TextInput, TouchableWi
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { cities } from '../../assets/cities/cities';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { FIRESTORE_DB } from '../config/firebase';
 
@@ -35,7 +36,7 @@ const AddTodoPopup: React.FC<Props> = ({ visible, onClose }) => {
         setDate(selectedDate || date);
     };
 
-    
+
     const toggleSourcePicker = () => {
         setDestinationPicker(false);
         setSourcePicker(!showSourcePicker);
@@ -175,15 +176,15 @@ const AddTodoPopup: React.FC<Props> = ({ visible, onClose }) => {
                         </View>
                         <View style={styles.buttonBlock}>
                             <Pressable
-                                style={[styles.buttonCover, (title === '' || price === '') && styles.disabledButton]}
+                                style={[styles.buttonCover, (title === '' || price === '' || mass === '' || distance === '') && styles.disabledButton]}
                                 onPress={addTodo}
-                                disabled={title === '' || price === ''}
+                                disabled={title === '' || price === '' || mass === '' || distance === ''}
                             >
                                 <Text style={styles.buttonText}>Добавить</Text>
                             </Pressable>
                         </View>
                         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                            <Text style={styles.closeButtonText}>x</Text>
+                            <Ionicons name="close" size={24} color="#F13" />
                         </TouchableOpacity>
                     </View>
                 </View>
