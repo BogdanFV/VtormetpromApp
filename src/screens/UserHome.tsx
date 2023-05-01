@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, Button, StyleSheet, TextInput, FlatList, TouchableOpacity, Modal } from 'react-native'
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native'
 import { FIRESTORE_DB } from '../config/firebase';
-import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { collection, deleteDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Entypo } from '@expo/vector-icons';
 import AddTodoPopup from '../components/AddTodoPopup';
@@ -10,7 +10,7 @@ export interface Todo {
   id: string;
 }
 
-export default function HomeScreen() {
+export default function UserHomeScreen() {
 
   const [todos, setTodos] = useState<any[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -19,7 +19,6 @@ export default function HomeScreen() {
     const todoRef = collection(FIRESTORE_DB, 'todos');
     const subscriber = onSnapshot(todoRef, {
       next: (snapshot) => {
-        console.log('UPDATED');
 
         const todos: any[] = [];
         snapshot.docs.forEach(doc => {
@@ -34,12 +33,9 @@ export default function HomeScreen() {
     return () => subscriber();
   }, []);
 
-  const addTodo = async () => {
-    setModalVisible(true);
-  };
-
   const renderTodo = ({ item }: any) => {
     const ref = doc(FIRESTORE_DB, `todos/${item.id}`);
+    console.log(item);
 
     const toggleDone = async () => {
       updateDoc(ref, { done: !item.done });
@@ -56,8 +52,8 @@ export default function HomeScreen() {
     return (
       <View style={styles.todoContainer}>
         <TouchableOpacity style={styles.todo} onPress={testFunc}>
-          {item.done && <Ionicons name="md-checkmark-circle" size={32} color="green" />}
-          {!item.done && <Entypo name="circle" size={32} color="black" />}
+          {/* {item.done && <Ionicons name="md-checkmark-circle" size={32} color="green" />}
+          {!item.done && <Entypo name="circle" size={32} color="black" />} */}
           <Text style={styles.todoText}>{item.title}</Text>
           <Text style={styles.todoText}>{parseInt(item.price).toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })}</Text>
         </TouchableOpacity>
@@ -70,9 +66,6 @@ export default function HomeScreen() {
     <View className="w-full h-full">
       <AddTodoPopup visible={modalVisible} onClose={() => setModalVisible(false)} />
       <View style={styles.container}>
-        <View style={styles.form}>
-          <Button onPress={addTodo} title='Добавить +' color="#000000" />
-        </View>
         {todos.length > 0 && (
           <View>
             <FlatList
@@ -90,7 +83,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
-    paddingTop: 50,
+    paddingVertical: 70,
     backgroundColor: '#838383',
     height: '100%',
   },
@@ -114,6 +107,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 10,
     marginVertical: 4,
+    borderRadius: 5,
   },
   todoText: {
     flex: 1,
@@ -123,5 +117,5 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-  }
+  },
 })
