@@ -44,6 +44,7 @@ export default function AdminHomeScreen() {
 
   const addTodo = async () => {
     setModalVisible(true);
+    console.log();
   };
 
   const renderTodo = ({ item }: any) => {
@@ -59,8 +60,6 @@ export default function AdminHomeScreen() {
     return (
       <View style={styles.todoContainer}>
         <TouchableOpacity style={styles.todo} onPress={openTodoDetails}>
-          {/* {item.done && <Ionicons name="md-checkmark-circle" size={32} color="green" />}
-          {!item.done && <Entypo name="circle" size={32} color="black" />} */}
           <View style={styles.firstLine}>
             <Text style={styles.todoId}>ID: {item.id}</Text>
             <Ionicons name="trash-bin-outline" size={24} color="red" onPress={deleteItem} />
