@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavigationContainer } from '@react-navigation/native';
-import AdminHomeScreen from "../screens/AdminHome";
+import { AdminHomeScreen } from "../screens/AdminHome";
 import CallScreen from "../screens/Call";
 import SettingsScreen from "../screens/Settings";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';

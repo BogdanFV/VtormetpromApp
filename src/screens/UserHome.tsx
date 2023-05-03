@@ -1,19 +1,28 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native'
+import { View, Text, Button, StyleSheet, TextInput, FlatList, TouchableOpacity, Modal } from 'react-native'
 import { FIRESTORE_DB } from '../config/firebase';
 import { collection, deleteDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Entypo } from '@expo/vector-icons';
+
 import AddTodoPopup from '../components/AddTodoPopup';
+import TodoList from '../components/TodoList';
 
 export interface Todo {
+  distance: String;
+  mass: String;
+  destination: String;
+  date: any;
+  price: string;
+  source: String;
+  title: String;
   id: string;
 }
-
+ 
 export default function UserHomeScreen() {
 
   const [todos, setTodos] = useState<any[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
 
   useEffect(() => {
     const todoRef = collection(FIRESTORE_DB, 'todos');
@@ -33,47 +42,42 @@ export default function UserHomeScreen() {
     return () => subscriber();
   }, []);
 
-  const renderTodo = ({ item }: any) => {
-    const ref = doc(FIRESTORE_DB, `todos/${item.id}`);
-
-    const toggleDone = async () => {
-      updateDoc(ref, { done: !item.done });
-    }
-
-    const deleteItem = async () => {
-      deleteDoc(ref);
-    }
-
-    const testFunc = async () => {
-      console.log('test: ', ref);
+  const TodoDetailsModal = ({ visible, onClose, todo }: any) => {
+    if (!todo) {
+      return null;
     }
 
     return (
-      <View style={styles.todoContainer}>
-        <TouchableOpacity style={styles.todo} onPress={testFunc}>
-          {/* {item.done && <Ionicons name="md-checkmark-circle" size={32} color="green" />}
-          {!item.done && <Entypo name="circle" size={32} color="black" />} */}
-          <Text style={styles.todoText}>{item.title}</Text>
-          <Text style={styles.todoText}>{item.destination}</Text>
-          <Text style={styles.todoText}>{parseInt(item.price).toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })}</Text>
-        </TouchableOpacity>
-        <Ionicons name="trash-bin-outline" size={24} color="red" onPress={deleteItem} />
-      </View>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={visible}
+        onRequestClose={onClose}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text>ID: {todo.id}</Text>
+            <Text>Title: {todo.title}</Text>
+            <Text>Price: {parseInt(todo.price).toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })}</Text>
+            <Text>Source: {todo.source}</Text>
+            <Text>Destination: {todo.destination}</Text>
+            <Text>Date: {new Date(todo.date.seconds * 1000).toLocaleString('ru-RU', { day: 'numeric', month: 'long' })}</Text>
+            <Text>Distance: {todo.distance} km</Text>
+            <Text>Mass: {todo.mass} t</Text>
+            <Button title="Close" onPress={onClose} />
+          </View>
+        </View>
+      </Modal>
     );
   };
 
   return (
     <View className="w-full h-full">
       <AddTodoPopup visible={modalVisible} onClose={() => setModalVisible(false)} />
+      <TodoDetailsModal visible={selectedTodo !== null} onClose={() => setSelectedTodo(null)} todo={selectedTodo} />
       <View style={styles.container}>
         {todos.length > 0 && (
-          <View>
-            <FlatList
-              data={todos}
-              renderItem={(item) => renderTodo(item)}
-              keyExtractor={(todo: Todo) => todo.id}
-            />
-          </View>
+          <TodoList displayDelete={false} todos={todos} onTodoPress={(todo: Todo) => setSelectedTodo(todo)}/>
         )}
       </View>
     </View>
@@ -83,8 +87,8 @@ export default function UserHomeScreen() {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
-    paddingVertical: 70,
-    backgroundColor: '#838383',
+    paddingTop: 50,
+    backgroundColor: '#636363',
     height: '100%',
   },
   form: {
@@ -92,30 +96,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  input: {
+  modalContainer: {
     flex: 1,
-    height: 40,
-    borderWidth: 1,
-    borderRadius: 4,
     padding: 10,
-    marginRight: 10,
+    backgroundColor: '#636363',
+    justifyContent: 'center',
+  },
+  modalContent: {
     backgroundColor: 'white',
-  },
-  todoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
     padding: 10,
-    marginVertical: 4,
-    borderRadius: 5,
-  },
-  todoText: {
-    flex: 1,
-    paddingHorizontal: 4,
-  },
-  todo: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  }
 })
