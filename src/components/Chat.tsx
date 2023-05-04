@@ -116,7 +116,7 @@ const Chat = () => {
         >
           {messages.map((message) => {
             return (
-              <>
+              <React.Fragment key={message.id}>
                 <View style={[styles.messageMetaInfo, message.user === currentUId && styles.metaInfoLine]}>
                   <Text style={styles.messageName}>{message.email}</Text>
                 </View>
@@ -125,7 +125,7 @@ const Chat = () => {
                   <Text style={styles.messageTime}>{message.createdAt ? new Date(message.createdAt.seconds * 1000).toLocaleTimeString() : 'Загрузка...'}</Text>
                   <View style={[styles.messageTail, message.user === currentUId ? styles.currentUserMessageTail : null]} />
                 </View>
-              </>
+              </React.Fragment>
             );
           })}
         </ScrollView>

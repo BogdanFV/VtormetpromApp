@@ -13,9 +13,9 @@ interface TodoListProps {
 
 const TodoList: React.FC<TodoListProps> = ({ todos, onTodoPress, displayDelete }) => {
 
-  const renderTodo = ({ item }: any) => {
+  const renderTodo = ({ item }: { item: Todo }) => {
     const ref = doc(FIRESTORE_DB, `todos/${item.id}`);
-
+  
     const deleteItem = async () => {
       deleteDoc(ref);
     }
@@ -24,7 +24,7 @@ const TodoList: React.FC<TodoListProps> = ({ todos, onTodoPress, displayDelete }
     }
 
     return (
-      <View style={styles.todoContainer}>
+      <View style={styles.todoContainer} key={item.id}>
         <TouchableOpacity style={styles.todo} onPress={openTodoDetails}>
           <View style={styles.firstLine}>
             <Text style={styles.todoId}>ID: {item.id}</Text>

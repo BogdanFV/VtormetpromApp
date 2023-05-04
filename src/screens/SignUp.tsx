@@ -10,11 +10,11 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import { StackScreenProps } from "@react-navigation/stack";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import { LinearGradient } from "expo-linear-gradient";
 import ErrorPopup from "../components/ErrorPopup";
-const logo = require("../../assets/logo.png")
+import { addDoc, collection } from "firebase/firestore";
+import { FIRESTORE_DB } from "../config/firebase";
 
 const auth = getAuth();
 
@@ -27,25 +27,26 @@ function SignUpScreen<StackScreenProps>({ navigation }: any) {
 
   const [errorVisible, setErrorVisible] = useState(false);
 
-  async function signUp() {
-    if (value.email === "" || value.password === "") {
-      setValue({
-        ...value,
-      });
-      setErrorVisible(true);
+  async function handleRegister() {
+    if (!value.email || !value.password) {
+      console.log('Введите email и пароль');
       return;
     }
-
     try {
-      await signInWithEmailAndPassword(auth, value.email, value.password);
-    } catch (error: any) {
-      setValue({
-        ...value,
-        error: error.message,
+      const authResult = await createUserWithEmailAndPassword(auth, value.email, value.password);
+      const userDocRef = await addDoc(collection(FIRESTORE_DB, "users"), {
+        uid: authResult.user.uid,
+        email: authResult.user.email,
+        isAdmin: false,
+        name: '',
       });
+      console.log("User document created with ID: ", userDocRef.id);
+    } catch (error: any) {
+      throw new Error("Something went wrong");
     }
   }
 
+  
   const dimensions = useWindowDimensions();
 
   const styles = StyleSheet.create({
@@ -107,12 +108,13 @@ function SignUpScreen<StackScreenProps>({ navigation }: any) {
               />
               <TextInput
                 placeholder="Введите пароль"
+                value={value.password}
                 style={styles.input}
                 onChangeText={(text) => setValue({ ...value, password: text })}
                 secureTextEntry={true}
               />
               <Pressable className="bg-background border border-white rounded-3xl py-2 px-4 m-4" style={styles.buttonCover}>
-                <Text onPress={signUp} style={styles.buttonText}>
+                <Text onPress={handleRegister} style={styles.buttonText}>
                   Регистрация
                 </Text>
               </Pressable>
