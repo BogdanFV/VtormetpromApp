@@ -23,13 +23,12 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { FIREBASE_AUTH } from '../config/firebase';
 import { FIRESTORE_DB } from '../config/firebase';
 
-
 export interface Message {
   id: string;
   email: string;
 }
 
-const Chat = () => {
+const UserChat = () => {
   const [messages, setMessages] = useState<any[]>([]);
   const [text, setText] = useState('');
   const [buttonVisible, setButtonVisible] = useState(true);
@@ -73,7 +72,6 @@ const Chat = () => {
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', handleContentSizeChange);
-
     return () => {
       keyboardDidShowListener.remove();
     };
@@ -115,19 +113,28 @@ const Chat = () => {
           onContentSizeChange={handleContentSizeChange}
         >
           {messages.map((message) => {
-            return (
-              <React.Fragment key={message.id}>
-                <View style={[styles.messageMetaInfo, message.user === currentUId && styles.metaInfoLine]}>
-                  <Text style={styles.messageName}>{message.email}</Text>
-                </View>
-                <View key={message.id} style={[styles.messageContainer, message.user === currentUId ? styles.currentUserMessage : null]}>
-                  <Text>{message.text}</Text>
-                  <Text style={styles.messageTime}>{message.createdAt ? new Date(message.createdAt.seconds * 1000).toLocaleTimeString() : 'Загрузка...'}</Text>
-                  <View style={[styles.messageTail, message.user === currentUId ? styles.currentUserMessageTail : null]} />
-                </View>
-              </React.Fragment>
-            );
+            if (message.user === currentUId) {
+              return (
+                <React.Fragment key={message.id}>
+                  <View style={[styles.messageMetaInfo, message.email === currentEmail && styles.metaInfoLine]}>
+                    <Text style={styles.messageName}>{message.email}</Text>
+                  </View>
+                  <View key={message.id} style={[styles.messageContainer, message.email === currentEmail ? styles.currentUserMessage : null]}>
+                    <Text>{message.text}</Text><Text style={styles.messageTime}>
+                      {message.createdAt
+                        ? new Date(message.createdAt.seconds * 1000).toLocaleDateString('ru-RU') + ' ' + new Date(message.createdAt.seconds * 1000).toLocaleTimeString()
+                        : 'Загрузка...'
+                      }
+                    </Text>
+                    <View style={[styles.messageTail, message.email === currentEmail ? styles.currentUserMessageTail : null]} />
+                  </View>
+                </React.Fragment>
+              );
+            } else {
+              return null;
+            }
           })}
+
         </ScrollView>
         <View style={styles.inputContainer}>
           <TextInput style={styles.input} value={text} onChangeText={(text) => setText(text)} placeholder="Введите сообщение..." placeholderTextColor="#AAA" />
@@ -237,4 +244,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default Chat;
+export default UserChat;

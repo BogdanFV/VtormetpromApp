@@ -46,7 +46,6 @@ export function AdminHomeScreen() {
 
   const addTodo = async () => {
     setModalVisible(true);
-    console.log();
   };
 
   const TodoDetailsModal = ({ visible, onClose, todo }: any) => {

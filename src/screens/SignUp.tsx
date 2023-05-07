@@ -39,6 +39,7 @@ function SignUpScreen<StackScreenProps>({ navigation }: any) {
         email: authResult.user.email,
         isAdmin: false,
         name: '',
+        messages: '',
       });
       console.log("User document created with ID: ", userDocRef.id);
     } catch (error: any) {

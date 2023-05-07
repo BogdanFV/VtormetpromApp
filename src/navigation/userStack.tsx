@@ -1,7 +1,7 @@
 import React from 'react'
 import { NavigationContainer } from '@react-navigation/native';
 import UserHomeScreen from "../screens/UserHome";
-import CallScreen from "../screens/Call";
+import UserCallScreen from "../screens/UserCall";
 import SettingsScreen from "../screens/Settings";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Feather from 'react-native-vector-icons/Feather';
@@ -34,8 +34,8 @@ export default function UserStack() {
             }}
           />
           <Tab.Screen
-            name="Call"
-            component={CallScreen}
+            name="UserCall"
+            component={UserCallScreen}
             options={{
               tabBarShowLabel: false,
               tabBarIcon: ({ focused }) => (

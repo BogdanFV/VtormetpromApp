@@ -1,7 +1,7 @@
 import React from 'react'
 import { NavigationContainer } from '@react-navigation/native';
 import { AdminHomeScreen } from "../screens/AdminHome";
-import CallScreen from "../screens/Call";
+import AdminChangeUser from '../screens/AdminChangeUser';
 import SettingsScreen from "../screens/Settings";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Feather from 'react-native-vector-icons/Feather';
@@ -35,7 +35,7 @@ export default function AdminStack() {
           />
           <Tab.Screen
             name="Call"
-            component={CallScreen}
+            component={AdminChangeUser}
             options={{
               tabBarShowLabel: false,
               tabBarIcon: ({ focused }) => (
