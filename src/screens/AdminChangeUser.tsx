@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Text, Pressable } from 'react-native';
 import { collection, query, getDocs } from 'firebase/firestore';
 import { FIRESTORE_DB } from '../config/firebase';
-import AdminChat from '../components/AdminChat';
+import Chat from '../components/Chat';
 
 interface User {
     id: string;
@@ -36,7 +36,7 @@ const AdminChangeUser = () => {
     return (
       <View style={styles.conteiner}>
         {selectedUserId ? (
-          <AdminChat userId={selectedUserId} email={selectedUserEmail} onBackClick={handleBackClick} />
+          <Chat isAdmin={true} userId={selectedUserId} userEmail={selectedUserEmail} onBackClick={handleBackClick} />
         ) : (
           <View style={styles.chooseUserCover} className="border-black">
             <View className="w-full items-center mb-3 bg-grey ">

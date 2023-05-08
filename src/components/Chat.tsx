@@ -30,16 +30,18 @@ export interface Message {
 }
 
 interface AdminChatProps {
+    isAdmin: boolean;
     userId: string;
-    email?: string;
-    onBackClick: () => void;
+    userEmail?: string;
+    onBackClick?: () => void;
 }
 
-const AdminChat = ({ userId, email, onBackClick }: AdminChatProps) => {
+const Chat = ({ isAdmin, userId, userEmail, onBackClick }: AdminChatProps) => {
+
     const [messages, setMessages] = useState<any[]>([]);
     const [text, setText] = useState('');
     const [buttonVisible, setButtonVisible] = useState(true);
-
+    const currentUId = FIREBASE_AUTH.currentUser?.uid;
     const currentEmail = FIREBASE_AUTH.currentUser?.email;
     const messageRef = collection(FIRESTORE_DB, 'messages');
     const messageQuery = query(collection(FIRESTORE_DB, 'messages'), orderBy('createdAt'));
@@ -85,11 +87,13 @@ const AdminChat = ({ userId, email, onBackClick }: AdminChatProps) => {
 
     const sendMessage = async () => {
         try {
+            console.log(userId, userEmail);
+            console.log(currentUId, currentEmail);
             if (text) {
                 const newMessage = {
                     text,
                     createdAt: serverTimestamp(),
-                    user: userId,
+                    user: currentUId,
                     email: currentEmail,
                 };
                 await addDoc(messageRef, newMessage);
@@ -103,16 +107,18 @@ const AdminChat = ({ userId, email, onBackClick }: AdminChatProps) => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.headerDirection}>
-                <Pressable onPress={onBackClick} style={styles.backButton}>
-                    <Text style={styles.buttonText}>
-                        Назад
+            {isAdmin && (
+                <View style={styles.headerDirection}>
+                    <Pressable onPress={onBackClick} style={styles.backButton}>
+                        <Text style={styles.buttonText}>
+                            Назад
+                        </Text>
+                    </Pressable>
+                    <Text style={styles.backText}>
+                        {userEmail}
                     </Text>
-                </Pressable>
-                <Text style={styles.backText}>
-                    {email}
-                </Text>
-            </View>
+                </View>
+            )}
             <KeyboardAwareScrollView
                 contentContainerStyle={styles.keyboardAwareScrollViewContentContainer}
                 keyboardShouldPersistTaps="handled"
@@ -120,7 +126,7 @@ const AdminChat = ({ userId, email, onBackClick }: AdminChatProps) => {
             >
                 {buttonVisible && (
                     <TouchableOpacity style={styles.scrollButton}>
-                        <Ionicons name="arrow-down-outline" size={40} color="blue" onPress={dragChatDown} />
+                        <Ionicons name="arrow-down-outline" size={40} color="#6154C8" onPress={dragChatDown} />
                     </TouchableOpacity>
                 )}
 
@@ -137,18 +143,39 @@ const AdminChat = ({ userId, email, onBackClick }: AdminChatProps) => {
                             if (message.user === userId) {
                                 return (
                                     <React.Fragment key={message.id}>
-                                        <View style={[styles.messageMetaInfo, message.email !== email && styles.metaInfoLine]}>
-                                            <Text style={styles.messageName}>{message.email}</Text>
-                                        </View>
-                                        <View key={message.id} style={[styles.messageContainer, message.email === email ? null : styles.currentUserMessage]}>
-                                            <Text>{message.text}</Text><Text style={styles.messageTime}>
-                                                {message.createdAt
-                                                    ? new Date(message.createdAt.seconds * 1000).toLocaleDateString('ru-RU') + ' ' + new Date(message.createdAt.seconds * 1000).toLocaleTimeString()
-                                                    : 'Загрузка...'
-                                                }
-                                            </Text>
-                                            <View style={[styles.messageTail, message.email === email ? null : styles.currentUserMessageTail]} />
-                                        </View>
+
+                                        {isAdmin
+                                            ? <>  
+                                                <View style={[styles.messageMetaInfo, message.email !== userEmail && styles.metaInfoLine]}>
+                                                    <Text style={styles.messageName}>{message.email}</Text>
+                                                </View>
+                                                <View key={message.id} style={[styles.messageContainer, message.email === userEmail ? null : styles.currentUserMessage]}>
+                                                    <Text>{message.text}</Text><Text style={styles.messageTime}>
+                                                        {message.createdAt
+                                                            ? new Date(message.createdAt.seconds * 1000).toLocaleDateString('ru-RU') + ' ' + new Date(message.createdAt.seconds * 1000).toLocaleTimeString()
+                                                            : 'Загрузка...'
+                                                        }
+                                                    </Text>
+                                                    <View style={[styles.messageTail, message.email === userEmail ? null : styles.currentUserMessageTail]} />
+                                                </View>
+                                            </>
+                                            : <>
+                                                <View style={[styles.messageMetaInfo, message.email === userEmail && styles.metaInfoLine]}>
+                                                    <Text style={styles.messageName}>{message.email}</Text>
+                                                </View>
+                                                <View key={message.id} style={[styles.messageContainer, message.email === userEmail ? styles.currentUserMessage : null]}>
+                                                    <Text>{message.text}</Text><Text style={styles.messageTime}>
+                                                        {message.createdAt
+                                                            ? new Date(message.createdAt.seconds * 1000).toLocaleDateString('ru-RU') + ' ' + new Date(message.createdAt.seconds * 1000).toLocaleTimeString()
+                                                            : 'Загрузка...'
+                                                        }
+                                                    </Text>
+                                                    <View style={[styles.messageTail, message.email === userEmail ? styles.currentUserMessageTail : null]} />
+                                                </View>
+                                            </>
+
+                                        }
+
                                     </React.Fragment>
                                 );
                             } else {
@@ -264,7 +291,7 @@ const styles = StyleSheet.create({
         color: 'white'
     },
     backButton: {
-        backgroundColor: '#23AD99',
+        backgroundColor: '#6154C8',
         paddingVertical: 10,
         width: '17%',
         alignItems: 'center',
@@ -281,4 +308,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default AdminChat;
+export default Chat;
