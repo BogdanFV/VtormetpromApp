@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, Button, StyleSheet, TextInput, FlatList, TouchableOpacity, Modal } from 'react-native'
+import { View, Text, Button, StyleSheet, Modal } from 'react-native'
 import { FIRESTORE_DB } from '../config/firebase';
-import { collection, deleteDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 import AddTodoPopup from '../components/AddTodoPopup';
 import TodoList from '../components/TodoList';
@@ -105,5 +104,6 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: 'white',
     padding: 10,
+    fontFamily: 'Montserrat-Black',
   }
 })

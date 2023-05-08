@@ -40,7 +40,7 @@ export default function UserStack() {
               tabBarShowLabel: false,
               tabBarIcon: ({ focused }) => (
                 <Feather
-                  name="users"
+                  name="mail"
                   color={focused ? "white" : "gray"}
                   size={24}
                 />

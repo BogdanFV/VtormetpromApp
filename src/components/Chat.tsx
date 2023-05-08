@@ -4,11 +4,12 @@ import {
     Text,
     TextInput,
     StyleSheet,
-    KeyboardAvoidingView,
     ScrollView,
     TouchableOpacity,
     Pressable,
     Keyboard,
+    Image,
+    ActivityIndicator,
 } from 'react-native';
 import {
     collection,
@@ -18,30 +19,36 @@ import {
     addDoc,
     serverTimestamp,
 } from 'firebase/firestore';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
+import * as ImagePicker from 'expo-image-picker';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { FIREBASE_AUTH } from '../config/firebase';
 import { FIRESTORE_DB } from '../config/firebase';
+import { FIREBASE_STORAGE } from '../config/firebase';
+import Feather from 'react-native-vector-icons/Feather';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export interface Message {
     id: string;
     email: string;
+    image: string;
 }
 
-interface AdminChatProps {
+interface ChatProps {
     isAdmin: boolean;
     userId: string;
     userEmail?: string;
     onBackClick?: () => void;
 }
 
-const Chat = ({ isAdmin, userId, userEmail, onBackClick }: AdminChatProps) => {
-
+const Chat = ({ isAdmin, userId, userEmail, onBackClick }: ChatProps) => {
+    const [selectedImage, setSelectedImage] = useState<string | null>('');
+    const [imageLoaded, setImageLoaded] = useState(false);
     const [messages, setMessages] = useState<any[]>([]);
     const [text, setText] = useState('');
     const [buttonVisible, setButtonVisible] = useState(true);
-    const currentUId = FIREBASE_AUTH.currentUser?.uid;
+
+    const currentUId = userId;
     const currentEmail = FIREBASE_AUTH.currentUser?.email;
     const messageRef = collection(FIRESTORE_DB, 'messages');
     const messageQuery = query(collection(FIRESTORE_DB, 'messages'), orderBy('createdAt'));
@@ -87,21 +94,42 @@ const Chat = ({ isAdmin, userId, userEmail, onBackClick }: AdminChatProps) => {
 
     const sendMessage = async () => {
         try {
-            console.log(userId, userEmail);
-            console.log(currentUId, currentEmail);
-            if (text) {
+            if (text || selectedImage) {
                 const newMessage = {
                     text,
                     createdAt: serverTimestamp(),
                     user: currentUId,
                     email: currentEmail,
+                    image: '',
                 };
+                if (selectedImage) {
+                    const response = await fetch(selectedImage);
+                    const blob = await response.blob();
+                    const storageRef = ref(FIREBASE_STORAGE, `images/${Math.random().toString(36).substring(7)}`);
+                    await uploadBytes(storageRef, blob, { contentType: 'image/jpeg' });
+                    const downloadURL = await getDownloadURL(storageRef);
+                    newMessage.image = downloadURL;
+                }
                 await addDoc(messageRef, newMessage);
                 setText('');
+                setSelectedImage(null);
                 scrollViewRef.current?.scrollToEnd();
             }
         } catch (error) {
             console.error('Error sending message: ', error);
+        }
+    };
+
+    const openGallery = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+        if (!result.cancelled) {
+            setSelectedImage(result.uri);
+            setImageLoaded(false);
         }
     };
 
@@ -125,8 +153,12 @@ const Chat = ({ isAdmin, userId, userEmail, onBackClick }: AdminChatProps) => {
                 extraScrollHeight={-70}
             >
                 {buttonVisible && (
-                    <TouchableOpacity style={styles.scrollButton}>
-                        <Ionicons name="arrow-down-outline" size={40} color="#6154C8" onPress={dragChatDown} />
+                    <TouchableOpacity style={styles.scrollButton} onPress={dragChatDown}>
+                        <Feather
+                            name="chevrons-down"
+                            color={"#6154C8"}
+                            size={40}
+                        />
                     </TouchableOpacity>
                 )}
 
@@ -143,14 +175,25 @@ const Chat = ({ isAdmin, userId, userEmail, onBackClick }: AdminChatProps) => {
                             if (message.user === userId) {
                                 return (
                                     <React.Fragment key={message.id}>
-
                                         {isAdmin
-                                            ? <>  
+                                            ? <>
                                                 <View style={[styles.messageMetaInfo, message.email !== userEmail && styles.metaInfoLine]}>
                                                     <Text style={styles.messageName}>{message.email}</Text>
                                                 </View>
                                                 <View key={message.id} style={[styles.messageContainer, message.email === userEmail ? null : styles.currentUserMessage]}>
-                                                    <Text>{message.text}</Text><Text style={styles.messageTime}>
+                                                    {message.text ? <Text>{message.text}</Text> : null}
+                                                    {message.image ? (
+                                                    <View style={styles.messageImageContainer}>
+                                                        <Image
+                                                            source={{ uri: message.image }}
+                                                            style={styles.messageImage}
+                                                            resizeMode="cover"
+                                                            onLoad={() => setImageLoaded(true)}
+                                                        />
+                                                    </View>
+                                                    ) : null}
+
+                                                    <Text style={styles.messageTime}>
                                                         {message.createdAt
                                                             ? new Date(message.createdAt.seconds * 1000).toLocaleDateString('ru-RU') + ' ' + new Date(message.createdAt.seconds * 1000).toLocaleTimeString()
                                                             : 'Загрузка...'
@@ -160,35 +203,72 @@ const Chat = ({ isAdmin, userId, userEmail, onBackClick }: AdminChatProps) => {
                                                 </View>
                                             </>
                                             : <>
-                                                <View style={[styles.messageMetaInfo, message.email === userEmail && styles.metaInfoLine]}>
-                                                    <Text style={styles.messageName}>{message.email}</Text>
+                                            <View style={[styles.messageMetaInfo, message.email === userEmail && styles.metaInfoLine]}>
+                                                <Text style={styles.messageName}>{message.email}</Text>
+                                            </View>
+                                            <View key={message.id} style={[styles.messageContainer, message.email !== userEmail ? null : styles.currentUserMessage]}>
+                                                {message.text ? <Text>{message.text}</Text> : null}
+                                                {message.image ? (
+                                                <View style={styles.messageImageContainer}>
+                                                    <Image
+                                                        source={{ uri: message.image }}
+                                                        style={styles.messageImage}
+                                                        resizeMode="cover"
+                                                        onLoad={() => setImageLoaded(true)}
+                                                    />
                                                 </View>
-                                                <View key={message.id} style={[styles.messageContainer, message.email === userEmail ? styles.currentUserMessage : null]}>
-                                                    <Text>{message.text}</Text><Text style={styles.messageTime}>
-                                                        {message.createdAt
-                                                            ? new Date(message.createdAt.seconds * 1000).toLocaleDateString('ru-RU') + ' ' + new Date(message.createdAt.seconds * 1000).toLocaleTimeString()
-                                                            : 'Загрузка...'
-                                                        }
-                                                    </Text>
-                                                    <View style={[styles.messageTail, message.email === userEmail ? styles.currentUserMessageTail : null]} />
-                                                </View>
-                                            </>
+                                                ) : null}
 
+                                                <Text style={styles.messageTime}>
+                                                    {message.createdAt
+                                                        ? new Date(message.createdAt.seconds * 1000).toLocaleDateString('ru-RU') + ' ' + new Date(message.createdAt.seconds * 1000).toLocaleTimeString()
+                                                        : 'Загрузка...'
+                                                    }
+                                                </Text>
+                                                <View style={[styles.messageTail, message.email !== userEmail ? null : styles.currentUserMessageTail]} />
+                                            </View>
+                                        </>
                                         }
-
                                     </React.Fragment>
                                 );
                             } else {
                                 return null;
                             }
                         })}
-
                     </ScrollView>
                     <View style={styles.inputContainer}>
-                        <TextInput style={styles.input} value={text} onChangeText={(text) => setText(text)} placeholder="Введите сообщение..." placeholderTextColor="#AAA" />
-                        <Pressable onPress={sendMessage}>
-                            <Text style={styles.buttonText}>Отправить</Text>
+                        <Pressable style={styles.paperclip} onPress={openGallery}>
+                            <Feather
+                                name="paperclip"
+                                color={"white"}
+                                size={24}
+                            />
                         </Pressable>
+                        <TextInput style={styles.input} value={text} onChangeText={(text) => setText(text)} placeholder="Введите сообщение..." placeholderTextColor="#AAA" />
+                        <Pressable style={styles.sendButton} onPress={sendMessage}>
+                            <Feather
+                                name="send"
+                                color={"white"}
+                                size={24}
+                            />
+                        </Pressable>
+                    </View>
+                    <View style={styles.selectedImageContainer}>
+                        {selectedImage && (
+                            <View style={styles.selectedImageWrapper}>
+                                <Image
+                                    source={{ uri: selectedImage }}
+                                    style={styles.selectedImage}
+                                    resizeMode="cover"
+                                />
+                                <TouchableOpacity
+                                    style={styles.removeImageButton}
+                                    onPress={() => setSelectedImage(null)}
+                                >
+                                    <Feather name="x" size={20} color="#fff" />
+                                </TouchableOpacity>
+                            </View>
+                        )}
                     </View>
                 </View>
             </KeyboardAwareScrollView>
@@ -260,7 +340,7 @@ const styles = StyleSheet.create({
         borderColor: '#e1e1e1',
         borderRadius: 8,
         padding: 8,
-        color: 'white'
+        color: 'white',
     },
     messageMetaInfo: {
         flexDirection: 'row-reverse',
@@ -304,8 +384,49 @@ const styles = StyleSheet.create({
     backText: {
         paddingRight: 100,
         color: 'white'
-    }
-
+    },
+    paperclip: {
+        marginLeft: 5,
+        marginRight: 10,
+    },
+    sendButton: {
+        marginRight: 5,
+    },
+    messageImageContainer: {
+        marginTop: 10,
+        marginBottom: 10,
+    },
+    messageImage: {
+        width: 250,
+        height: 250,
+        borderRadius: 10,
+    },
+    selectedImageContainer: {
+        flexDirection: "row",
+        marginBottom: 10,
+        justifyContent: "center",
+      },
+      selectedImageWrapper: {
+        position: "relative",
+        marginRight: 10,
+      },
+      selectedImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 10,
+      },
+      removeImageButton: {
+        position: "absolute",
+        top: -10,
+        right: -10,
+        backgroundColor: "#ff3b3b",
+        borderRadius: 10,
+        width: 20,
+        height: 20,
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 2,
+      },
 });
 
 export default Chat;
