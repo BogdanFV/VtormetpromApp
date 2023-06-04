@@ -5,7 +5,6 @@ const auth = getAuth();
 
 export function useAuth() {
   const [user, setUser] = React.useState<User>();
-  // (user?.uid === 'hXjxbO7ANndyuFdB7iVWWaMCDW43') ? console.log('is admin') : console.log('is user')
 
   useEffect(() => {
     const unsubscribeFromAuthStateChanged = onAuthStateChanged(auth, (user) => {

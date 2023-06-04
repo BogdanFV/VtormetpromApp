@@ -114,6 +114,13 @@ function SignUpScreen<StackScreenProps>({ navigation }: any) {
                 onChangeText={(text) => setValue({ ...value, password: text })}
                 secureTextEntry={true}
               />
+              <TextInput
+                placeholder="Подтвердите пароль"
+                value={value.password}
+                style={styles.input}
+                onChangeText={(text) => setValue({ ...value, password: text })}
+                secureTextEntry={true}
+              />
               <Pressable className="bg-background border border-white rounded-3xl py-2 px-4 m-4" style={styles.buttonCover}>
                 <Text onPress={handleRegister} style={styles.buttonText}>
                   Регистрация

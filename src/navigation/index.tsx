@@ -6,8 +6,9 @@ import AdminStack from './adminStack';
 
 export default function RootNavigation() {
   const { user } = useAuth();
-  const isAdmin = user?.uid === 'hXjxbO7ANndyuFdB7iVWWaMCDW43';
+  const isAdmin = user?.uid === 'dyldo5rDqDY6Fy5zZZTiDglugJA3';
 
+  // 'hXjxbO7ANndyuFdB7iVWWaMCDW43' || 
   if(user) {
     if(isAdmin){
       return <AdminStack />

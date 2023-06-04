@@ -6,12 +6,16 @@ import { Todo } from '../screens/AdminHome';
 import { FIRESTORE_DB } from '../config/firebase';
 
 interface TodoListProps {
+  filter: string;
   todos: Todo[];
   onTodoPress: (todo: Todo) => void;
   displayDelete: boolean;
 }
 
-const TodoList: React.FC<TodoListProps> = ({ todos, onTodoPress, displayDelete }) => {
+
+const TodoList: React.FC<TodoListProps> = ({ filter, todos, onTodoPress, displayDelete }) => {
+  
+  console.log(filter);
 
   const renderTodo = ({ item }: { item: Todo }) => {
     const ref = doc(FIRESTORE_DB, `todos/${item.id}`);
@@ -71,6 +75,12 @@ const styles = StyleSheet.create({
       backgroundColor: '#fff',
       padding: 10,
       marginVertical: 4,
+
+      shadowColor: '#000000',
+      shadowOffset: { width: 1, height: 3 },
+      shadowOpacity: 0.5,
+      shadowRadius: 5,
+      elevation: 4,
     },
     todo: {
       flex: 1,
@@ -101,11 +111,9 @@ const styles = StyleSheet.create({
     todoSource: {
       flex: 1,
       fontSize: 15,
-      fontFamily: 'Verdana',
     },
     todoDestination: {
       fontSize: 15,
-      fontFamily: 'Verdana',
     },
     arrowCover: {
       flex: 1,

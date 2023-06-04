@@ -1,29 +1,40 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, Button, StyleSheet, Modal } from 'react-native'
+import { View, Text, Button, StyleSheet, Modal, Dimensions } from 'react-native'
+
+// import MapView, { Marker, Polyline } from 'react-native-maps';
+
 import { FIRESTORE_DB } from '../config/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 
 import AddTodoPopup from '../components/AddTodoPopup';
 import TodoList from '../components/TodoList';
 
+
 export interface Todo {
-  distance: String;
-  mass: String;
-  destination: String;
+  distance: string;
+  mass: string;
+  destination: string;
   date: any;
   price: string;
-  source: String;
-  title: String;
+  source: string;
+  title: string;
   id: string;
 }
- 
-export default function UserHomeScreen() {
+
+export function AdminHomeScreen() {
 
   const [todos, setTodos] = useState<any[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
-  
-  const [selectedSort, setSelectedSort] = useState('');
+
+
+  const coordinates = [
+    { latitude: 56.8389, longitude: 60.6057 }, // Начальная точка маршрута
+    { latitude: 58.0104, longitude: 56.2343 },   // Конечная точка маршрута
+  ];
+
+  const [markerCoordinates, setMarkerCoordinates] = useState(coordinates);
+  const [polylineCoordinates, setPolylineCoordinates] = useState(coordinates);
 
   useEffect(() => {
     const todoRef = collection(FIRESTORE_DB, 'todos');
@@ -42,6 +53,8 @@ export default function UserHomeScreen() {
     });
     return () => subscriber();
   }, []);
+
+
 
   const TodoDetailsModal = ({ visible, onClose, todo }: any) => {
     if (!todo) {
@@ -78,7 +91,7 @@ export default function UserHomeScreen() {
       <TodoDetailsModal visible={selectedTodo !== null} onClose={() => setSelectedTodo(null)} todo={selectedTodo} />
       <View style={styles.container}>
         {todos.length > 0 && (
-          <TodoList displayDelete={false} filter={selectedSort}  todos={todos} onTodoPress={(todo: Todo) => setSelectedTodo(todo)}/>
+          <TodoList displayDelete={true} todos={todos} onTodoPress={(todo: Todo) => setSelectedTodo(todo)} />
         )}
       </View>
     </View>
@@ -106,6 +119,9 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: 'white',
     padding: 10,
-    fontFamily: 'Montserrat-Black',
+    fontFamily: 'Gotu-Regular',
+  },
+  test: {
+    height: Dimensions.get('window').height / 2,
   }
 })

@@ -41,7 +41,6 @@ function WelcomeScreen<StackScreenProps>({ navigation }: any) {
     logoName: {
       marginLeft: 10,
       fontSize: 28,
-      fontFamily: 'Georgia',
     }
   });
 

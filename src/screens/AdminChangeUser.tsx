@@ -40,7 +40,7 @@ const AdminChangeUser = () => {
         ) : (
           <View style={styles.chooseUserCover} className="border-black">
             <View className="w-full items-center mb-3 bg-grey ">
-              <Text className="text-slate-50 text-base" >Выберите пользователя</Text>
+              <Text className="text-slate-50 text-base" >Открыть диалог</Text>
             </View>
             {users.map((user) => (
               <Pressable
@@ -77,10 +77,11 @@ const styles = StyleSheet.create({
 
     },
     userField: {
-        width: '100%',
+        width: '95%',
         alignItems: 'center',
         justifyContent: 'center',
         padding: 20,
+        marginBottom: 10,
         fontSize: 12,
     },
     header: {
